@@ -9,4 +9,20 @@
     state: present
     insertafter: EOF
 
+- name: Enable autologin service
+  become: true
+  become_method: su
+  systemd:
+    name: getty@tty1.service
+    state: restarted
+    daemon_reload: yes
+
+- name: Configure autologin for user
+  become: true
+  become_method: su
+  replace:
+    path: "/etc/systemd/system/getty.target.wants/getty@tty1.service"
+    regexp: "^ExecStart=.*"
+    replace: "ExecStart=-/sbin/agetty --autologin {{ ansible_env.USER }} --noclear %I 38400 linux"
+
 ...
